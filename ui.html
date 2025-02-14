@@ -63,6 +63,90 @@
     margin-bottom: 4px;
     color: #18A0FB;
   }
+  
+  .advanced-options {
+    margin-top: 12px;
+    padding: 12px;
+    background: linear-gradient(145deg, #252525, #2D2D2D);
+    border-radius: 8px;
+    border: 1px solid #404040;
+    display: none;
+  }
+  
+  .advanced-options.show {
+    display: block;
+  }
+  
+  .option-group {
+    margin-bottom: 12px;
+  }
+  
+  .option-group:last-child {
+    margin-bottom: 0;
+  }
+  
+  .radio-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .radio-option input[type="radio"] {
+    accent-color: #18A0FB;
+  }
+  
+  .checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  
+  .checkbox-option input[type="checkbox"] {
+    accent-color: #18A0FB;
+  }
+  
+  .option-label {
+    font-size: 12px;
+    color: #CCCCCC;
+  }
+  
+  .preview-section {
+    margin-top: 16px;
+    padding: 16px;
+    background: linear-gradient(145deg, #1A1A1A, #222222);
+    border-radius: 8px;
+    border: 1px solid #404040;
+  }
+  
+  .preview-label {
+    font-size: 12px;
+    color: #888888;
+    margin-bottom: 8px;
+  }
+  
+  .preview-content {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 14px;
+    color: #18A0FB;
+    background: #2A2A2A;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #404040;
+    word-break: break-all;
+  }
+  
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, #404040, transparent);
+    margin: 20px 0;
+  }
 </style>
 
 <div class="container">
@@ -85,11 +169,169 @@
         </optgroup>
       </select>
     </div>
+    
+    <!-- 日期的進階選項 -->
+    <div id="dateOptions" class="advanced-options">
+      <div class="option-group">
+        <div class="option-label">日期格式</div>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="dateFormat" value="date" checked>
+            <span>日期</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="dateFormat" value="datetime">
+            <span>日期時間</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 港口的進階選項 -->
+    <div id="portOptions" class="advanced-options">
+      <div class="option-group">
+        <label class="checkbox-option">
+          <input type="checkbox" id="showPortCode" checked>
+          <span>顯示港口代碼</span>
+        </label>
+      </div>
+      <div class="option-group">
+        <div class="option-label">大小寫格式</div>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="portCase" value="upper" checked>
+            <span>全大寫</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="portCase" value="title">
+            <span>首字母大寫</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    
+    <div class="preview-section">
+      <div class="preview-label">預覽結果</div>
+      <div id="preview" class="preview-content">
+        <!-- 預覽內容將在這裡動態更新 -->
+      </div>
+    </div>
   </div>
+  
+  <div class="divider"></div>
+  
   <button id="generate">產生假資料</button>
 </div>
 
 <script>
+// 生成預覽資料的函數
+function generatePreview(type, options = {}) {
+  const previews = {
+    hbl: () => 'HKGL12345678',
+    mbl: () => 'MAEU987654321',
+    container: () => 'CMAU1234567',
+    port: () => {
+      const portName = 'HONG KONG';
+      const portCode = '(HKG)';
+      
+      let formattedName = options.portCase === 'upper' ? 
+        portName : 
+        portName.split(' ').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        ).join(' ');
+      
+      return options.showPortCode ? 
+        `${formattedName} ${portCode}` : 
+        formattedName;
+    },
+    date: () => {
+      const date = new Date(2024, 2, 15); // 2024-03-15
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const year = date.getFullYear();
+      const dateStr = `${month}-${day}-${year}`;
+      
+      return options.dateFormat === 'datetime' ? 
+        `${dateStr} 14:30` : 
+        dateStr;
+    },
+    po: () => 'PO1234567',
+    carrier: () => 'MAERSK LINE'
+  };
+
+  return previews[type] ? previews[type]() : '選擇資料類型';
+}
+
+// 更新預覽的函數
+function updatePreview() {
+  const selectedType = document.getElementById('dataType').value;
+  const options = {
+    dateFormat: document.querySelector('input[name="dateFormat"]:checked')?.value || 'date',
+    showPortCode: document.getElementById('showPortCode')?.checked ?? true,
+    portCase: document.querySelector('input[name="portCase"]:checked')?.value || 'upper'
+  };
+  
+  console.log('Current options:', options);
+  
+  const previewElement = document.getElementById('preview');
+  previewElement.textContent = generatePreview(selectedType, options);
+}
+
+// 監聽所有可能改變預覽的事件
+document.getElementById('dataType').addEventListener('change', () => {
+  const selectedType = document.getElementById('dataType').value;
+  
+  // 隱藏所有進階選項
+  document.querySelectorAll('.advanced-options').forEach(el => {
+    el.classList.remove('show');
+  });
+  
+  // 顯示對應的進階選項
+  if (selectedType === 'date') {
+    document.getElementById('dateOptions').classList.add('show');
+  } else if (selectedType === 'port') {
+    document.getElementById('portOptions').classList.add('show');
+  }
+  
+  updatePreview();
+});
+
+// 監聽進階選項的變化
+document.querySelectorAll('input[name="dateFormat"]').forEach(radio => {
+  radio.addEventListener('change', updatePreview);
+});
+
+document.getElementById('showPortCode')?.addEventListener('change', updatePreview);
+
+document.querySelectorAll('input[name="portCase"]').forEach(radio => {
+  radio.addEventListener('change', updatePreview);
+});
+
+// 確保所有選項的事件監聽器都正確設置
+document.addEventListener('DOMContentLoaded', () => {
+  // 監聽港口選項的變化
+  const showPortCodeCheckbox = document.getElementById('showPortCode');
+  if (showPortCodeCheckbox) {
+    showPortCodeCheckbox.addEventListener('change', (e) => {
+      console.log('Port code checkbox changed:', e.target.checked);
+      updatePreview();
+    });
+  }
+
+  const portCaseRadios = document.querySelectorAll('input[name="portCase"]');
+  portCaseRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      console.log('Port case changed:', radio.value);
+      updatePreview();
+    });
+  });
+
+  // 其他事件監聽保持不變
+  // 初始化預覽
+  updatePreview();
+});
+
+// 原有的 generate 按鈕事件處理
 document.getElementById('generate').onclick = () => {
   const selectedType = document.getElementById('dataType').value;
   const selections = {
@@ -99,7 +341,12 @@ document.getElementById('generate').onclick = () => {
     port: selectedType === 'port',
     date: selectedType === 'date',
     po: selectedType === 'po',
-    carrier: selectedType === 'carrier'
+    carrier: selectedType === 'carrier',
+    options: {
+      dateFormat: document.querySelector('input[name="dateFormat"]:checked')?.value || 'date',
+      showPortCode: document.getElementById('showPortCode')?.checked ?? true,
+      portCase: document.querySelector('input[name="portCase"]:checked')?.value || 'upper'
+    }
   };
   parent.postMessage({ pluginMessage: { type: 'generate', selections } }, '*');
 };

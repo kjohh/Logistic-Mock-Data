@@ -7,7 +7,7 @@
 // full browser environment (See https://www.figma.com/plugin-docs/how-plugins-run).
 
 // This shows the HTML page in "ui.html".
-figma.showUI(__html__, { width: 240, height: 320 });
+figma.showUI(__html__, { width: 280, height: 480 });
 
 // Calls to "parent.postMessage" from within the HTML page will trigger this
 // callback. The callback will be passed the "pluginMessage" property of the
@@ -31,6 +31,11 @@ interface SelectionOptions {
   date: boolean;
   po: boolean;
   carrier: boolean;
+  options: {
+    dateFormat: 'date' | 'datetime';
+    showPortCode: boolean;
+    portCase: 'upper' | 'title';
+  };
 }
 
 interface PluginMessage {
@@ -95,11 +100,45 @@ function generateContainer(): string {
   return `${prefix}${number}${checkDigit}`;
 }
 
-function generateDate(): string {
+function generateDate(format: 'date' | 'datetime'): string {
   const start: Date = new Date(2024, 0, 1);
   const end: Date = new Date(2024, 11, 31);
   const randomDate: Date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-  return randomDate.toISOString().split('T')[0];
+  
+  // 格式化日期部分
+  const year = randomDate.getFullYear();
+  const month = String(randomDate.getMonth() + 1).padStart(2, '0');
+  const day = String(randomDate.getDate()).padStart(2, '0');
+  const dateStr = `${month}-${day}-${year}`;
+  
+  if (format === 'datetime') {
+    // 格式化時間部分
+    const hours = String(Math.floor(Math.random() * 24)).padStart(2, '0');
+    const minutes = String(Math.floor(Math.random() * 60)).padStart(2, '0');
+    return `${dateStr} ${hours}:${minutes}`;
+  }
+  
+  return dateStr;
+}
+
+function formatPort(port: string, showCode: boolean, caseFormat: 'upper' | 'title'): string {
+  // 先分離城市名稱和代碼
+  const [cityPart, codePart] = port.split(' (');
+  
+  // 處理城市名稱的格式
+  let formattedCity = caseFormat === 'upper' ? 
+    cityPart : 
+    cityPart.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    ).join(' ');
+  
+  // 如果不需要顯示代碼，直接返回格式化後的城市名稱
+  if (!showCode) {
+    return formattedCity;
+  }
+  
+  // 返回完整格式（包含代碼）
+  return `${formattedCity} (${codePart}`;
 }
 
 figma.ui.onmessage = async (msg: PluginMessage) => {
@@ -142,9 +181,14 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
           } else if (selections.container) {
             newText = generateContainer();
           } else if (selections.port) {
-            newText = ports[Math.floor(Math.random() * ports.length)];
+            const randomPort = ports[Math.floor(Math.random() * ports.length)];
+            newText = formatPort(
+              randomPort, 
+              selections.options.showPortCode,
+              selections.options.portCase
+            );
           } else if (selections.date) {
-            newText = generateDate();
+            newText = generateDate(selections.options.dateFormat);
           } else if (selections.po) {
             newText = generatePO();
           } else if (selections.carrier) {
