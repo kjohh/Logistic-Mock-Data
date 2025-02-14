@@ -2,62 +2,96 @@
   body {
     font-family: Inter, sans-serif;
     padding: 20px;
+    background: #1E1E1E;
+    color: #FFFFFF;
+    margin: 0;
   }
+  
   .container {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
   }
-  .radio-group {
-    display: flex;
-    gap: 8px;
-    align-items: center;
+  
+  .select-wrapper {
+    position: relative;
   }
+  
+  select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    background: linear-gradient(145deg, #2A2A2A, #323232);
+    border: 1px solid #404040;
+    color: #FFFFFF;
+    appearance: none;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .select-wrapper::after {
+    content: '▼';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #18A0FB;
+    pointer-events: none;
+  }
+  
   button {
-    background: #18A0FB;
+    background: linear-gradient(135deg, #18A0FB, #0D8DE3);
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 12px 24px;
+    border-radius: 8px;
     cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(24, 160, 251, 0.2);
+  }
+  
+  button:hover {
+    background: linear-gradient(135deg, #1490E4, #0C7CC8);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(24, 160, 251, 0.3);
+  }
+  
+  .title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #18A0FB;
   }
 </style>
 
 <div class="container">
-  <div class="radio-group">
-    <input type="radio" id="hbl" name="dataType" value="hbl" checked>
-    <label for="hbl">HB/L No.</label>
-  </div>
-  <div class="radio-group">
-    <input type="radio" id="mbl" name="dataType" value="mbl">
-    <label for="mbl">MB/L No.</label>
-  </div>
-  <div class="radio-group">
-    <input type="radio" id="po" name="dataType" value="po">
-    <label for="po">P/O No.</label>
-  </div>
-  <div class="radio-group">
-    <input type="radio" id="container" name="dataType" value="container">
-    <label for="container">Container No.</label>
-  </div>
-  <div class="radio-group">
-    <input type="radio" id="carrier" name="dataType" value="carrier">
-    <label for="carrier">Carrier</label>
-  </div>
-  <div class="radio-group">
-    <input type="radio" id="port" name="dataType" value="port">
-    <label for="port">Port Location</label>
-  </div>
-  <div class="radio-group">
-    <input type="radio" id="date" name="dataType" value="date">
-    <label for="date">Date</label>
+  <div>
+    <div class="title">選擇資料類型</div>
+    <div class="select-wrapper">
+      <select id="dataType">
+        <optgroup label="運輸文件">
+          <option value="hbl">HB/L No.</option>
+          <option value="mbl">MB/L No.</option>
+          <option value="po">P/O No.</option>
+        </optgroup>
+        <optgroup label="貨櫃資訊">
+          <option value="container">Container No.</option>
+          <option value="carrier">Carrier</option>
+        </optgroup>
+        <optgroup label="地點和時間">
+          <option value="port">Port Location</option>
+          <option value="date">Date</option>
+        </optgroup>
+      </select>
+    </div>
   </div>
   <button id="generate">產生假資料</button>
 </div>
 
 <script>
 document.getElementById('generate').onclick = () => {
-  const selectedType = document.querySelector('input[name="dataType"]:checked').value;
+  const selectedType = document.getElementById('dataType').value;
   const selections = {
     hbl: selectedType === 'hbl',
     mbl: selectedType === 'mbl',

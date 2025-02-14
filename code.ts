@@ -105,18 +105,25 @@ function generateDate(): string {
 figma.ui.onmessage = async (msg: PluginMessage) => {
   if (msg.type === 'generate') {
     const selections = msg.selections;
-    const nodes: readonly SceneNode[] = figma.currentPage.selection;
-
-    if (nodes.length === 0) {
-      figma.notify('請先選擇文字圖層');
-      return;
-    }
+    let nodes: SceneNode[] = [...figma.currentPage.selection];
 
     try {
-      // 檢查並載入所有需要的字體
+      // 如果沒有選擇任何圖層，創建新的文字圖層
+      if (nodes.length === 0) {
+        const text = figma.createText();
+        // 設置文字圖層位置在視窗中心
+        const center = figma.viewport.center;
+        text.x = center.x;
+        text.y = center.y;
+        
+        // 載入預設字體
+        await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+        nodes = [text];
+      }
+
+      // 載入所有需要的字體
       for (const node of nodes) {
         if (node.type === 'TEXT') {
-          // 獲取當前文字圖層使用的字體
           const fontName = node.fontName;
           if (fontName !== figma.mixed) {
             await figma.loadFontAsync(fontName);
@@ -149,6 +156,12 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
       }
       
       figma.notify('假資料已生成！');
+      
+      // 如果是新創建的文字圖層，選中它
+      if (figma.currentPage.selection.length === 0) {
+        figma.currentPage.selection = nodes;
+        figma.viewport.scrollAndZoomIntoView(nodes);
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '未知錯誤';
       figma.notify('生成過程中發生錯誤：' + errorMessage);
