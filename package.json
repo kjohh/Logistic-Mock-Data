@@ -1,5 +1,5 @@
 {
-  "name": "Logistic-Mock-Data",
+  "name": "logistic-mock-data",
   "version": "1.0.0",
   "description": "Your Figma Plugin",
   "main": "code.js",
