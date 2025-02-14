@@ -1,0 +1,72 @@
+<style>
+  body {
+    font-family: Inter, sans-serif;
+    padding: 20px;
+  }
+  .container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .radio-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  button {
+    background: #18A0FB;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+</style>
+
+<div class="container">
+  <div class="radio-group">
+    <input type="radio" id="hbl" name="dataType" value="hbl" checked>
+    <label for="hbl">HB/L No.</label>
+  </div>
+  <div class="radio-group">
+    <input type="radio" id="mbl" name="dataType" value="mbl">
+    <label for="mbl">MB/L No.</label>
+  </div>
+  <div class="radio-group">
+    <input type="radio" id="po" name="dataType" value="po">
+    <label for="po">P/O No.</label>
+  </div>
+  <div class="radio-group">
+    <input type="radio" id="container" name="dataType" value="container">
+    <label for="container">Container No.</label>
+  </div>
+  <div class="radio-group">
+    <input type="radio" id="carrier" name="dataType" value="carrier">
+    <label for="carrier">Carrier</label>
+  </div>
+  <div class="radio-group">
+    <input type="radio" id="port" name="dataType" value="port">
+    <label for="port">Port Location</label>
+  </div>
+  <div class="radio-group">
+    <input type="radio" id="date" name="dataType" value="date">
+    <label for="date">Date</label>
+  </div>
+  <button id="generate">產生假資料</button>
+</div>
+
+<script>
+document.getElementById('generate').onclick = () => {
+  const selectedType = document.querySelector('input[name="dataType"]:checked').value;
+  const selections = {
+    hbl: selectedType === 'hbl',
+    mbl: selectedType === 'mbl',
+    container: selectedType === 'container',
+    port: selectedType === 'port',
+    date: selectedType === 'date',
+    po: selectedType === 'po',
+    carrier: selectedType === 'carrier'
+  };
+  parent.postMessage({ pluginMessage: { type: 'generate', selections } }, '*');
+};
+</script>
