@@ -31,6 +31,7 @@ interface SelectionOptions {
   date: boolean;
   po: boolean;
   carrier: boolean;
+  invoice: boolean;
   options: {
     dateFormat: 'date' | 'datetime';
     showPortCode: boolean;
@@ -141,6 +142,12 @@ function formatPort(port: string, showCode: boolean, caseFormat: 'upper' | 'titl
   return `${formattedCity} (${codePart}`;
 }
 
+function generateInvoice(): string {
+  const digits = Math.floor(6 + Math.random() * 3); // 生成 6-8 位數
+  const number = String(Math.floor(Math.pow(10, digits - 1) + Math.random() * Math.pow(10, digits))).padStart(digits, '0');
+  return `INV-${number}`;
+}
+
 figma.ui.onmessage = async (msg: PluginMessage) => {
   if (msg.type === 'generate') {
     const selections = msg.selections;
@@ -193,6 +200,8 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             newText = generatePO();
           } else if (selections.carrier) {
             newText = generateCarrier();
+          } else if (selections.invoice) {
+            newText = generateInvoice();
           }
           
           node.characters = newText;

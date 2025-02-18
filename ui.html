@@ -158,6 +158,7 @@
           <option value="hbl">HB/L No.</option>
           <option value="mbl">MB/L No.</option>
           <option value="po">P/O No.</option>
+          <option value="invoice">Invoice No.</option>
         </optgroup>
         <optgroup label="貨櫃資訊">
           <option value="container">Container No.</option>
@@ -256,7 +257,8 @@ function generatePreview(type, options = {}) {
         dateStr;
     },
     po: () => 'PO1234567',
-    carrier: () => 'MAERSK LINE'
+    carrier: () => 'MAERSK LINE',
+    invoice: () => 'INV-123456'
   };
 
   return previews[type] ? previews[type]() : '選擇資料類型';
@@ -342,6 +344,7 @@ document.getElementById('generate').onclick = () => {
     date: selectedType === 'date',
     po: selectedType === 'po',
     carrier: selectedType === 'carrier',
+    invoice: selectedType === 'invoice',
     options: {
       dateFormat: document.querySelector('input[name="dateFormat"]:checked')?.value || 'date',
       showPortCode: document.getElementById('showPortCode')?.checked ?? true,
